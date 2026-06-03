@@ -1,0 +1,48 @@
+# dependencies
+node_modules/
+
+# next
+.next/
+out/
+
+# build
+dist/
+build/
+
+# cache
+.cache/
+.turbo/
+.vercel/
+
+# env
+.env
+.env.local
+.env.*.local
+.env.*
+!.env.example
+
+# python
+__pycache__/
+.pytest_cache/
+.venv/
+*.pyc
+*.pyo
+*.pyd
+
+# typescript
+*.tsbuildinfo
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# system/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# codex/local
+.codex/

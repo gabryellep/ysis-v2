@@ -1,1 +1,1 @@
-"""Transcription service placeholders. Audio must not be saved by default."""
+"""Backend-only transcription providers for temporary audio uploads."""

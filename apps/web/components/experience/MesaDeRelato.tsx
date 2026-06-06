@@ -187,7 +187,7 @@ function getDiscreetCopy(discreetMode: boolean) {
         writeTitle: "Escrever",
         writeText: "Digite no seu ritmo e organize os pontos que deseja lembrar.",
         voiceTitle: "Simular fala",
-        voiceText: "Demonstracao visual. Nenhum audio e gravado nesta versao."
+        voiceText: "Grave audio temporario para gerar um texto revisavel, sem salvar por padrao."
       }
     };
   }
@@ -200,7 +200,7 @@ function getDiscreetCopy(discreetMode: boolean) {
       writeTitle: "Escrever",
       writeText: "Digite no seu ritmo, organize seus pensamentos enquanto escreve.",
       voiceTitle: "Falar",
-      voiceText: "Use uma simulacao de fala e depois escreva o trecho que deseja revisar."
+      voiceText: "Grave sua fala para gerar uma transcricao editavel antes de continuar."
     }
   };
 }

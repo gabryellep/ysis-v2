@@ -1,4 +1,4 @@
-# Backend Foundation - Fases 5 e 6
+# Backend Foundation - Fases 5, 6 e 7A
 
 ## O Que Foi Portado Da V1
 
@@ -25,6 +25,7 @@
 - `POST /sessoes/iniciar`: cria sessao convidada, temporaria ou de conta quando houver JWT valido do Supabase.
 - `POST /privacidade/consentimentos`: valida contrato de consentimento e persiste via backend quando houver usuaria autenticada.
 - `POST /privacidade/eventos`: valida eventos de privacidade e persiste via backend quando houver usuaria autenticada.
+- `POST /audio/transcrever`: recebe upload temporario de audio com consentimento explicito, valida tipo/tamanho e retorna transcricao estruturada revisavel sem persistir audio ou transcricao por padrao.
 
 ## Configuracao Supabase - Fase 6
 
@@ -39,6 +40,32 @@ As variaveis esperadas estao documentadas em `.env.example`:
 
 Nao ha chave Supabase no frontend e nao ha uso de `NEXT_PUBLIC_SUPABASE_*`.
 Sem essas variaveis, a API continua subindo em modo local seguro: sessoes convidadas funcionam e consentimentos/eventos sao validados sem persistencia.
+
+## Transcricao de Audio - Fase 7A
+
+A rota `POST /audio/transcrever` aceita `multipart/form-data` com:
+
+- `audio`: arquivo temporario (`audio/webm`, `audio/mp4`, `audio/mpeg`, `audio/wav` ou `audio/ogg`).
+- `audio_consent_granted=true`.
+- `consent_text_version`.
+- `discreet_mode`, opcional.
+
+O backend valida consentimento, tipo de arquivo e tamanho maximo antes de chamar o provider. O conteudo do audio fica apenas em memoria durante a requisicao, e o arquivo de upload e fechado ao final do processamento. Nenhum audio, transcricao ou relato sensivel e salvo por padrao.
+
+Variaveis:
+
+- `TRANSCRIPTION_PROVIDER=mock|openai`.
+- `TRANSCRIPTION_MODEL`, padrao `gpt-4o-mini-transcribe`.
+- `TRANSCRIPTION_MAX_UPLOAD_MB`, padrao `12`.
+- `OPENAI_API_KEY`, backend-only.
+- `CORS_ORIGINS`, origens locais permitidas para o frontend.
+- `NEXT_PUBLIC_YSIS_API_URL`, URL nao secreta usada pelo frontend para chamar o backend.
+
+Sem `TRANSCRIPTION_PROVIDER=openai` e `OPENAI_API_KEY`, a API usa provider mock seguro. O modo mock retorna texto claramente identificado como rascunho revisavel e nao executa transcricao real.
+
+Com provider real configurado, a chamada acontece somente no backend. O frontend nunca chama OpenAI diretamente e nenhuma chave e exposta no browser.
+
+O backend carrega variaveis de `./.env` no root do repositorio e de `apps/api/.env`, usando caminhos absolutos derivados de `apps/api/app/core/config.py`. Quando o provider real falha, o endpoint retorna fallback mock com `attempted_provider`, `fallback_reason`, `provider` e `provider_mode`, sem incluir audio/transcricao sensivel em logs.
 
 ## Sessao Convidada e Conta Opcional
 
@@ -74,7 +101,7 @@ O payload auditavel nao contem relato, audio, transcricao ou texto intimo.
 
 - Sem OpenAI real.
 - Sem RAG.
-- Sem transcricao real.
+- Transcricao real apenas se provider backend estiver configurado; sem chave, modo mock seguro.
 - Sem login visual final.
 - Sem historico real no frontend.
 - Sem salvar audio por padrao.

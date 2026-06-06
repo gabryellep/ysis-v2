@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from app.core.config import Settings
+from app.core.config import Settings, get_settings
 from app.main import app
 from app.schemas.audio import AudioConsentEvidence
 from app.services.transcription.provider import MockTranscriptionProvider, TemporaryAudio, get_transcription_provider
@@ -29,12 +29,16 @@ def test_audio_transcription_rejects_unsupported_type() -> None:
 
 
 def test_audio_transcription_uses_safe_mock_without_persistence() -> None:
-    with TestClient(app) as client:
-        response = client.post(
-            "/audio/transcrever",
-            data={"audio_consent_granted": "true", "consent_text_version": "audio-test-v1"},
-            files={"audio": ("relato.webm", b"fake-audio", "audio/webm")},
-        )
+    app.dependency_overrides[get_settings] = lambda: Settings(TRANSCRIPTION_PROVIDER="mock", OPENAI_API_KEY=None)
+    try:
+        with TestClient(app) as client:
+            response = client.post(
+                "/audio/transcrever",
+                data={"audio_consent_granted": "true", "consent_text_version": "audio-test-v1"},
+                files={"audio": ("relato.webm", b"fake-audio", "audio/webm")},
+            )
+    finally:
+        app.dependency_overrides.clear()
 
     body = response.json()
     result = body["result"]
@@ -57,6 +61,14 @@ def test_transcription_provider_selects_openai_when_configured() -> None:
     assert provider.mode == "real"
 
 
+def test_transcription_provider_selects_local_when_configured() -> None:
+    settings = Settings(TRANSCRIPTION_PROVIDER="local", OPENAI_API_KEY=None)
+    provider = get_transcription_provider(settings)
+
+    assert provider.name == "local"
+    assert provider.mode == "local"
+
+
 def test_mock_fallback_can_report_attempted_provider() -> None:
     consent = AudioConsentEvidence(granted=True, text_version="audio-test-v1")
     result = MockTranscriptionProvider().transcribe(
@@ -68,3 +80,16 @@ def test_mock_fallback_can_report_attempted_provider() -> None:
     assert result.provider == "mock"
     assert result.attempted_provider == "openai"
     assert result.fallback_reason == "APIConnectionError"
+
+
+def test_mock_fallback_can_report_local_attempt() -> None:
+    consent = AudioConsentEvidence(granted=True, text_version="audio-test-v1")
+    result = MockTranscriptionProvider().transcribe(
+        audio=TemporaryAudio(filename="a.webm", content_type="audio/webm", data=b"x"),
+        consent=consent,
+    )
+    result = result.model_copy(update={"attempted_provider": "local", "fallback_reason": "ModuleNotFoundError"})
+
+    assert result.provider == "mock"
+    assert result.attempted_provider == "local"
+    assert result.fallback_reason == "ModuleNotFoundError"

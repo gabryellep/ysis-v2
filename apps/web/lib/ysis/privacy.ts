@@ -6,7 +6,8 @@ export const consentItems: Array<{ key: ConsentKey; label: string }> = [
   { key: "professionalCare", label: "Entendo que a Ysis nao substitui atendimento profissional." },
   { key: "canReview", label: "Entendo que posso revisar e editar meu texto antes de usar." },
   { key: "demoNoPermanentSave", label: "Entendo que esta versao e demonstrativa e nao salva meu texto permanentemente." },
-  { key: "voiceIsDemo", label: "Entendo que o modo falar ainda e demonstrativo e nao realiza gravacao ou transcricao real nesta fase." }
+  { key: "aiProcessing", label: "Autorizo o processamento temporario por IA para organizar um rascunho revisavel." },
+  { key: "voiceIsDemo", label: "Entendo que audio, transcricao e relato nao sao salvos por padrao." }
 ];
 
 export const privacyNotes = [

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from app.core.config import Settings
 from app.schemas.audio import AudioConsentEvidence, AudioTranscriptionResult, TranscriptionSegment
@@ -83,7 +85,70 @@ class OpenAITranscriptionProvider(TranscriptionProvider):
         )
 
 
+class LocalWhisperTranscriptionProvider(TranscriptionProvider):
+    name = "local"
+    mode = "local"
+
+    def __init__(self, settings: Settings) -> None:
+        self._settings = settings
+
+    def transcribe(self, audio: TemporaryAudio, consent: AudioConsentEvidence) -> AudioTranscriptionResult:
+        from faster_whisper import WhisperModel
+
+        suffix = _suffix_for_content_type(audio.content_type)
+        temp_path: str | None = None
+        try:
+            with NamedTemporaryFile(prefix="ysis-audio-", suffix=suffix, delete=False) as temp_file:
+                temp_file.write(audio.data)
+                temp_path = temp_file.name
+
+            model = WhisperModel(self._settings.local_transcription_model, device="cpu", compute_type="int8")
+            segments_iter, info = model.transcribe(temp_path, language="pt")
+            segments: list[TranscriptionSegment] = []
+            texts: list[str] = []
+            for index, segment in enumerate(segments_iter):
+                text = (segment.text or "").strip()
+                if not text:
+                    continue
+                texts.append(text)
+                segments.append(
+                    TranscriptionSegment(
+                        index=index,
+                        text=text[:1200],
+                        start_seconds=float(segment.start),
+                        end_seconds=float(segment.end),
+                    )
+                )
+
+            transcript = " ".join(texts).strip()
+            return AudioTranscriptionResult(
+                transcript=transcript,
+                language=getattr(info, "language", None) or "pt-BR",
+                segments=segments[:80],
+                provider="local",
+                provider_mode="local",
+                attempted_provider="local",
+                consent=consent,
+                note="Transcricao local gerada com faster-whisper. Arquivo temporario descartado apos processamento.",
+            )
+        finally:
+            if temp_path:
+                Path(temp_path).unlink(missing_ok=True)
+
+
 def get_transcription_provider(settings: Settings) -> TranscriptionProvider:
     if settings.transcription_real_configured:
         return OpenAITranscriptionProvider(settings)
+    if settings.transcription_provider == "local":
+        return LocalWhisperTranscriptionProvider(settings)
     return MockTranscriptionProvider()
+
+
+def _suffix_for_content_type(content_type: str) -> str:
+    if "wav" in content_type:
+        return ".wav"
+    if "ogg" in content_type:
+        return ".ogg"
+    if "mp4" in content_type:
+        return ".mp4"
+    return ".webm"

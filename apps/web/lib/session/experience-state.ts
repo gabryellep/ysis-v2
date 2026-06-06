@@ -10,6 +10,7 @@ export type RelatoDraft = {
     professionalCare: boolean;
     canReview: boolean;
     demoNoPermanentSave: boolean;
+    aiProcessing: boolean;
     voiceIsDemo: boolean;
   };
 };
@@ -23,6 +24,7 @@ export const initialRelatoDraft: RelatoDraft = {
     professionalCare: false,
     canReview: false,
     demoNoPermanentSave: false,
+    aiProcessing: false,
     voiceIsDemo: false
   }
 };

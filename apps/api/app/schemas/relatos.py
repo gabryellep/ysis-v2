@@ -61,4 +61,13 @@ class OrganizarRelatoResult(StrictSchema):
     revision_questions: list[str] = Field(default_factory=list, max_length=8)
     missing_fields: dict[str, str] = Field(default_factory=dict)
     warnings: list[SafetyWarning] = Field(default_factory=list)
-
+    provider: Literal["mock", "openai", "local"] = "mock"
+    provider_mode: Literal["mock", "real", "local"] = "mock"
+    attempted_provider: Literal["mock", "openai", "local"] | None = None
+    fallback_reason: str | None = Field(default=None, max_length=120)
+    persisted: Literal[False] = False
+    review_required: Literal[True] = True
+    diagnostic_notice: str = Field(
+        default="Rascunho revisavel, sem avaliacao clinica, recomendacao de cuidado ou conclusao sensivel.",
+        max_length=600,
+    )

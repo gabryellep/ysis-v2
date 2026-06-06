@@ -46,20 +46,35 @@ def validate_output_or_fallback(result: BaseModel | dict[str, Any]) -> tuple[dic
     )
 
 
-def safe_envelope(result: BaseModel | dict[str, Any], ok: bool = True) -> ApiEnvelope:
+def safe_envelope(
+    result: BaseModel | dict[str, Any],
+    ok: bool = True,
+    prompt_version: str | None = None,
+    model_version: str | None = None,
+) -> ApiEnvelope:
     safe_result, safety = validate_output_or_fallback(result)
     return ApiEnvelope(
         ok=ok and not safety.fallback_used,
-        metadata=SchemaMetadata(),
+        metadata=SchemaMetadata(
+            prompt_version=prompt_version or SchemaMetadata().prompt_version,
+            model_version=model_version or SchemaMetadata().model_version,
+        ),
         safety=safety,
         result=safe_result,
     )
 
 
-def safe_fallback(blocked_terms: list[str] | None = None) -> ApiEnvelope:
+def safe_fallback(
+    blocked_terms: list[str] | None = None,
+    prompt_version: str | None = None,
+    model_version: str | None = None,
+) -> ApiEnvelope:
     return ApiEnvelope(
         ok=False,
-        metadata=SchemaMetadata(),
+        metadata=SchemaMetadata(
+            prompt_version=prompt_version or SchemaMetadata().prompt_version,
+            model_version=model_version or SchemaMetadata().model_version,
+        ),
         safety=SafetyMetadata(
             blocked_terms_found=blocked_terms or [],
             fallback_used=True,

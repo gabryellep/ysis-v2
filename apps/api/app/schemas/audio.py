@@ -23,9 +23,9 @@ class AudioTranscriptionResult(StrictSchema):
     transcript: str = Field(max_length=20000)
     language: str = "pt-BR"
     segments: list[TranscriptionSegment] = Field(default_factory=list, max_length=80)
-    provider: Literal["mock", "openai"]
-    provider_mode: Literal["mock", "real"]
-    attempted_provider: Literal["mock", "openai"] | None = None
+    provider: Literal["mock", "openai", "local"]
+    provider_mode: Literal["mock", "real", "local"]
+    attempted_provider: Literal["mock", "openai", "local"] | None = None
     fallback_reason: str | None = Field(default=None, max_length=120)
     audio_saved: Literal[False] = False
     persisted: Literal[False] = False

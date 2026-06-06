@@ -54,18 +54,55 @@ O backend valida consentimento, tipo de arquivo e tamanho maximo antes de chamar
 
 Variaveis:
 
-- `TRANSCRIPTION_PROVIDER=mock|openai`.
-- `TRANSCRIPTION_MODEL`, padrao `gpt-4o-mini-transcribe`.
+- `TRANSCRIPTION_PROVIDER=mock|openai|local`.
+- `TRANSCRIPTION_MODEL`, padrao `gpt-4o-transcribe`.
+- `LOCAL_TRANSCRIPTION_MODEL`, padrao `base`, usado apenas com provider local opcional.
 - `TRANSCRIPTION_MAX_UPLOAD_MB`, padrao `12`.
 - `OPENAI_API_KEY`, backend-only.
 - `CORS_ORIGINS`, origens locais permitidas para o frontend.
 - `NEXT_PUBLIC_YSIS_API_URL`, URL nao secreta usada pelo frontend para chamar o backend.
 
 Sem `TRANSCRIPTION_PROVIDER=openai` e `OPENAI_API_KEY`, a API usa provider mock seguro. O modo mock retorna texto claramente identificado como rascunho revisavel e nao executa transcricao real.
+Transcricao usa um modelo especifico de speech-to-text, separado de `AI_MODEL`. Modelos menores, como variantes mini de transcricao, podem ser usados em desenvolvimento ou testes de custo, mas nao devem definir a capacidade da organizacao textual.
+
+O provider local de transcricao e opcional e voltado a desenvolvimento gratuito. Ele tenta usar `faster-whisper` localmente com `LOCAL_TRANSCRIPTION_MODEL`; se a dependencia, o modelo ou o ambiente local nao estiverem disponiveis, a rota cai para mock seguro com `attempted_provider=local` e `fallback_reason`. Esse modo pode criar um arquivo temporario durante a transcricao local e apaga o arquivo ao final da requisicao.
 
 Com provider real configurado, a chamada acontece somente no backend. O frontend nunca chama OpenAI diretamente e nenhuma chave e exposta no browser.
 
 O backend carrega variaveis de `./.env` no root do repositorio e de `apps/api/.env`, usando caminhos absolutos derivados de `apps/api/app/core/config.py`. Quando o provider real falha, o endpoint retorna fallback mock com `attempted_provider`, `fallback_reason`, `provider` e `provider_mode`, sem incluir audio/transcricao sensivel em logs.
+
+## Organizacao de Relato com IA - Fase 7B
+
+`POST /relatos/organizar` agora usa uma camada de provider em `apps/api/app/services/ai/provider.py`.
+O endpoint exige consentimento com escopo `ai_processing`, aceita sessao convidada sem persistencia e retorna um `ApiEnvelope` com schema Pydantic validado.
+
+Variaveis:
+
+- `AI_PROVIDER=mock|openai|local`.
+- `AI_MODEL`, padrao `gpt-5.5` para producao e relatos sensiveis.
+- `LOCAL_LLM_URL`, padrao `http://127.0.0.1:11434`, usado para Ollama/endpoint local compativel.
+- `LOCAL_LLM_MODEL`, padrao `llama3.1:8b`, usado apenas com provider local.
+- `OPENAI_API_KEY`, backend-only e compartilhada com transcricao quando necessario.
+
+Sem `AI_PROVIDER=openai` e `OPENAI_API_KEY`, o provider mock seguro continua ativo. Com provider real, a chamada ao OpenAI acontece apenas no backend, usa structured output via JSON schema, inclui `store=false` e nao expõe chave no browser.
+Para desenvolvimento ou controle de custo, `AI_MODEL` pode ser trocado por um modelo menor, como `gpt-4.1-mini`, via `.env`. Para relatos sensiveis, a recomendacao do projeto e usar um modelo mais forte configurado no backend por `AI_MODEL`, sem prender o produto a uma variante mini.
+
+O provider local de organizacao (`AI_PROVIDER=local`) chama um endpoint local estilo Ollama em `LOCAL_LLM_URL` usando `LOCAL_LLM_MODEL`. Ele e apenas para desenvolvimento gratuito, demos internas e testes sem creditos. A qualidade, consistencia de JSON estruturado e sensibilidade de linguagem podem ser inferiores a uma LLM forte de producao; por isso a validacao Pydantic, sanitizacao e fallback mock continuam obrigatorios.
+
+O resultado inclui resumo revisavel, topicos, campos sugeridos, informacoes ausentes, perguntas cuidadosas, flags de safety e metadados de provider. Nenhum relato, transcricao ou saida de IA e salvo por padrao.
+n8n nao faz parte do caminho principal de dados sensiveis nesta fase. Relato, audio, transcricao e saida de IA passam pelo backend FastAPI e nao devem ser enviados a automacoes externas sem desenho e consentimento especificos.
+
+Perfis recomendados de `.env`:
+
+- Producao forte: `AI_PROVIDER=openai`, `AI_MODEL=gpt-5.5`, `TRANSCRIPTION_PROVIDER=openai`, `TRANSCRIPTION_MODEL=gpt-4o-transcribe`.
+- Desenvolvimento barato com OpenAI: `AI_PROVIDER=openai`, `AI_MODEL=gpt-4.1-mini`, `TRANSCRIPTION_PROVIDER=openai`, `TRANSCRIPTION_MODEL=gpt-4o-mini-transcribe`.
+- Desenvolvimento gratuito/local: `AI_PROVIDER=local` com Ollama, `TRANSCRIPTION_PROVIDER=local` com `faster-whisper`, ou `mock` quando essas ferramentas nao estiverem disponiveis.
+
+Guardrails:
+
+- Antes da IA: valida payload, consentimento `ai_processing`, texto nao vazio pelo schema e linguagem diagnostica/prescritiva proibida.
+- Depois da IA: valida Pydantic, sanitiza frases absolutas, bloqueia diagnostico/prescricao/conclusoes sensiveis e usa fallback seguro se a saida nao puder ser tornada segura.
+- Fallbacks retornam `attempted_provider` e `fallback_reason` sem logar conteudo sensivel.
 
 ## Sessao Convidada e Conta Opcional
 
@@ -99,9 +136,10 @@ O payload auditavel nao contem relato, audio, transcricao ou texto intimo.
 
 ## Limites Da Fase
 
-- Sem OpenAI real.
+- OpenAI real apenas quando provider backend estiver configurado; sem chave, modo mock seguro.
 - Sem RAG.
 - Transcricao real apenas se provider backend estiver configurado; sem chave, modo mock seguro.
+- Providers locais sao apenas para desenvolvimento e caem para mock quando indisponiveis.
 - Sem login visual final.
 - Sem historico real no frontend.
 - Sem salvar audio por padrao.
@@ -138,6 +176,6 @@ Checklist manual para Supabase local/remoto:
 ## Proximos Passos
 
 - Conectar ambiente Supabase real e executar validacoes RLS com usuarios de teste.
-- Conectar provider real de IA com `store: false`, schemas estruturados e validacao pos-geracao.
+- Validar provider real de IA com chave/modelos de producao, mantendo `store=false`, schemas estruturados e validacao pos-geracao.
 - Adicionar testes de safety para entradas e saidas com linguagem proibida.
 - Planejar transcricao real sem salvar audio por padrao.

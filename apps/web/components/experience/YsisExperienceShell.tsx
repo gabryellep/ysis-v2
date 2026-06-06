@@ -14,6 +14,7 @@ export function YsisExperienceShell() {
   const [relatoDraft, setRelatoDraft] = useState<RelatoDraft>(initialRelatoDraft);
 
   function openIntake() {
+    setRelatoDraft(initialRelatoDraft);
     setActiveView("intake");
     setMesaMode("rest");
   }
@@ -45,7 +46,7 @@ export function YsisExperienceShell() {
                   draft={relatoDraft}
                   onDraftChange={updateRelatoDraft}
                   onModeChange={setMesaMode}
-                  onNewIntake={() => setMesaMode("writing")}
+                  onStartNew={openIntake}
                   onNavigate={setActiveView}
                 />
               ) : null}

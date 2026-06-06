@@ -2,15 +2,19 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import type { RelatoDraft } from "@/lib/session/experience-state";
 
 type VoiceState = "ready" | "recording" | "paused" | "finished";
 
 type CapsulaDeVozProps = {
+  draft: RelatoDraft;
+  onChange: (draft: Partial<RelatoDraft>) => void;
   onBack: () => void;
+  onReview: () => void;
   onSwitchToWrite: () => void;
 };
 
-export function CapsulaDeVoz({ onBack, onSwitchToWrite }: CapsulaDeVozProps) {
+export function CapsulaDeVoz({ draft, onChange, onBack, onReview, onSwitchToWrite }: CapsulaDeVozProps) {
   const [state, setState] = useState<VoiceState>("ready");
   const [duration, setDuration] = useState(0);
 
@@ -23,6 +27,7 @@ export function CapsulaDeVoz({ onBack, onSwitchToWrite }: CapsulaDeVozProps) {
   function discard() {
     setState("ready");
     setDuration(0);
+    onChange({ text: "" });
   }
 
   return (
@@ -75,9 +80,16 @@ export function CapsulaDeVoz({ onBack, onSwitchToWrite }: CapsulaDeVozProps) {
                 {state === "finished" ? (
                   <motion.div key="finished" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="flex flex-col items-center gap-4">
                     <p className="text-sm text-muted">Gravacao finalizada</p>
+                    <textarea
+                      value={draft.text}
+                      onChange={(event) => onChange({ text: event.target.value, inputMode: "voice" })}
+                      aria-label="Relato de voz para revisao"
+                      placeholder="Nesta demonstracao, escreva aqui o que voce quer revisar depois de falar."
+                      className="min-h-32 w-full max-w-xl resize-none rounded-2xl border border-[rgba(103,43,66,0.08)] bg-[rgb(var(--color-paper))] p-4 text-sm leading-6 text-ink outline-none placeholder:text-muted/50"
+                    />
                     <div className="flex items-center gap-3">
                       <button type="button" onClick={discard} className="rounded-xl bg-[rgba(231,176,184,0.18)] px-4 py-2.5 text-sm text-wine transition hover:bg-[rgba(231,176,184,0.28)]">Descartar</button>
-                      <button type="button" className="rounded-xl bg-[rgb(var(--color-wine))] px-4 py-2.5 text-sm font-semibold text-paper transition hover:bg-[rgba(103,43,66,0.9)]">Revisar</button>
+                      <button type="button" onClick={onReview} disabled={!draft.text.trim()} className="rounded-xl bg-[rgb(var(--color-wine))] px-4 py-2.5 text-sm font-semibold text-paper transition hover:bg-[rgba(103,43,66,0.9)] disabled:cursor-not-allowed disabled:opacity-45">Revisar</button>
                     </div>
                   </motion.div>
                 ) : null}

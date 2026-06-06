@@ -1,6 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { RelatoPurposeStep } from "@/components/ferramenta/RelatoPurposeStep";
+import { RelatoReportStep } from "@/components/ferramenta/RelatoReportStep";
+import { RelatoReviewStep } from "@/components/ferramenta/RelatoReviewStep";
 import { CapsulaDeVoz } from "@/components/intake/CapsulaDeVoz";
 import { EditorDeRelato } from "@/components/intake/EditorDeRelato";
 import type { MesaMode, RelatoDraft, WorkspaceView } from "@/lib/session/experience-state";
@@ -10,26 +13,74 @@ type MesaDeRelatoProps = {
   draft: RelatoDraft;
   onDraftChange: (draft: Partial<RelatoDraft>) => void;
   onModeChange: (mode: MesaMode) => void;
-  onNewIntake: () => void;
+  onStartNew: () => void;
   onNavigate: (view: WorkspaceView) => void;
 };
 
-export function MesaDeRelato({ mode, draft, onDraftChange, onModeChange, onNewIntake, onNavigate }: MesaDeRelatoProps) {
+export function MesaDeRelato({ mode, draft, onDraftChange, onModeChange, onStartNew, onNavigate }: MesaDeRelatoProps) {
+  const previousInputStep = draft.inputMode === "voice" ? "voice" : "writing";
+
   return (
     <AnimatePresence mode="wait">
-      {mode === "rest" ? <ChooseMode key="choose" onBack={() => onNavigate("home")} onWrite={onNewIntake} onVoice={() => onModeChange("voice")} /> : null}
+      {mode === "rest" ? <ChooseMode key="choose" onBack={() => onNavigate("home")} onWrite={() => {
+        onDraftChange({ inputMode: "writing" });
+        onModeChange("writing");
+      }} onVoice={() => {
+        onDraftChange({ inputMode: "voice" });
+        onModeChange("voice");
+      }} /> : null}
       {mode === "writing" ? (
         <EditorDeRelato
           key="write"
           draft={draft}
-          onChange={onDraftChange}
+          onChange={(nextDraft) => onDraftChange({ ...nextDraft, inputMode: "writing" })}
           onClear={() => onDraftChange({ text: "", quickNote: "" })}
           onBack={() => onModeChange("rest")}
-          onReview={() => onNavigate("report")}
+          onReview={() => onModeChange("review")}
           onPreferVoice={() => onModeChange("voice")}
         />
       ) : null}
-      {mode === "voice" ? <CapsulaDeVoz key="voice" onBack={() => onModeChange("rest")} onSwitchToWrite={() => onModeChange("writing")} /> : null}
+      {mode === "voice" ? (
+        <CapsulaDeVoz
+          key="voice"
+          draft={draft}
+          onChange={onDraftChange}
+          onBack={() => onModeChange("rest")}
+          onReview={() => onModeChange("review")}
+          onSwitchToWrite={() => {
+            onDraftChange({ inputMode: "writing" });
+            onModeChange("writing");
+          }}
+        />
+      ) : null}
+      {mode === "review" ? (
+        <RelatoReviewStep
+          key="review"
+          draft={draft}
+          onChange={onDraftChange}
+          onBack={() => onModeChange(previousInputStep)}
+          onContinue={() => onModeChange("purpose")}
+        />
+      ) : null}
+      {mode === "purpose" ? (
+        <RelatoPurposeStep
+          key="purpose"
+          value={draft.purpose}
+          onChange={(purpose) => onDraftChange({ purpose })}
+          onBack={() => onModeChange("review")}
+          onContinue={() => onModeChange("demo-report")}
+        />
+      ) : null}
+      {mode === "demo-report" && draft.purpose ? (
+        <RelatoReportStep
+          key="demo-report"
+          relato={draft.text}
+          purpose={draft.purpose}
+          onBack={() => onModeChange("purpose")}
+          onEditRelato={() => onModeChange("review")}
+          onStartNew={onStartNew}
+        />
+      ) : null}
     </AnimatePresence>
   );
 }

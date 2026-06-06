@@ -1,25 +1,27 @@
-import type { DemoReport, RelatoPurpose } from "@/lib/ysis/types";
+import type { RelatoPurpose } from "@/lib/ysis/types";
+
+type DemoReport = {
+  title: string;
+  summary: string;
+  mainPoints: string[];
+  reportedSituations: string[];
+  suggestedQuestions: string[];
+  importantNotes: string[];
+};
 
 const purposeLabels: Record<RelatoPurpose, string> = {
-  consultation: "levar para consulta",
-  symptoms: "organizar sintomas",
-  conversation: "preparar conversa",
+  gynecologist: "ginecologista",
+  psychologist: "psicologa",
+  obstetrics: "obstetricia",
+  sensitive_situation: "situacao sensivel",
   personal: "registrar para mim"
 };
 
 const purposeQuestions: Record<RelatoPurpose, string[]> = {
-  consultation: [
-    "Pode ser util conversar com uma profissional sobre o que voce relatou e quando isso comecou?",
-    "Ha sinais de alerta ou cuidados imediatos que voce deveria observar?"
-  ],
-  symptoms: [
-    "Como voce pode acompanhar frequencia, intensidade e contexto do que foi relatado?",
-    "Quais informacoes ajudam a diferenciar sintomas, situacoes e mudancas recentes?"
-  ],
-  conversation: [
-    "Qual e a forma mais confortavel de explicar o que voce relatou em atendimento?",
-    "Quais limites, receios ou preferencias voce quer comunicar antes do exame ou conversa?"
-  ],
+  gynecologist: ["Quando comecou, com que frequencia aparece e qual intensidade voce relatou?", "Ha relacao com ciclo, rotina ou contexto corporal informado?"],
+  psychologist: ["Qual frase de abertura parece possivel para conversar sobre isso?", "Quais sentimentos, medos ou bloqueios voce quer nomear?"],
+  obstetrics: ["Qual contexto gestacional foi informado?", "Quais sinais relatados podem ser levados para avaliacao profissional?"],
+  sensitive_situation: ["Quais partes voce lembra e quais parecem incertas?", "Que limites e apoio desejado voce quer registrar?"],
   personal: [
     "O que mudou desde que voce percebeu essa situacao?",
     "Que informacoes voce quer guardar para comparar depois, se fizer sentido?"

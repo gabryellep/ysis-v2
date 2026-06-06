@@ -5,7 +5,7 @@ export type RelatoDraft = {
   text: string;
   quickNote: string;
   inputMode: "writing" | "voice" | null;
-  purpose: "consultation" | "symptoms" | "conversation" | "personal" | null;
+  purpose: "gynecologist" | "psychologist" | "obstetrics" | "personal" | "sensitive_situation" | null;
   consent: {
     professionalCare: boolean;
     canReview: boolean;

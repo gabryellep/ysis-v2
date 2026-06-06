@@ -19,6 +19,7 @@ PURPOSE_TITLES = {
     ReportPurpose.PERSONAL: "Registro pessoal revisavel",
     ReportPurpose.GYNECOLOGIST: "Relatorio para ginecologia",
     ReportPurpose.PSYCHOLOGIST: "Relatorio para psicologia",
+    ReportPurpose.OBSTETRICS: "Relatorio para obstetricia",
     ReportPurpose.URGENT_CARE: "Relatorio para atendimento de urgencia",
     ReportPurpose.SENSITIVE_SITUATION: "Relatorio para situacao sensivel",
 }

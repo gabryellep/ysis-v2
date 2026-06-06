@@ -4,13 +4,19 @@
   "title": "Ysis V2 Structured Report",
   "type": "object",
   "additionalProperties": false,
-  "required": ["title", "purpose", "period", "summary", "sections", "suggested_questions", "safety_warnings", "missing_fields"],
+  "required": ["title", "purpose", "report_type", "audience", "tone", "period", "summary", "sections", "suggested_questions", "non_diagnostic_notice", "fallback_message", "safety_warnings", "missing_fields", "provider", "provider_mode", "persisted", "review_required"],
   "properties": {
     "title": { "type": "string", "minLength": 1, "maxLength": 160 },
     "purpose": {
       "type": "string",
-      "enum": ["consultation", "symptoms", "conversation", "personal", "gynecologist", "psychologist", "urgent_care", "sensitive_situation"]
+      "enum": ["consultation", "symptoms", "conversation", "personal", "gynecologist", "psychologist", "obstetrics", "urgent_care", "sensitive_situation"]
     },
+    "report_type": {
+      "type": "string",
+      "enum": ["ginecologia", "psicologia", "obstetricia", "registro_pessoal", "situacao_sensivel", "geral"]
+    },
+    "audience": { "type": "string" },
+    "tone": { "type": "string" },
     "period": { "type": "string" },
     "source_record_ids": { "type": "array", "items": { "type": "string" }, "maxItems": 30 },
     "summary": { "type": "string" },
@@ -28,11 +34,12 @@
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["label", "value", "sensitive"],
+              "required": ["label", "value", "sensitive", "missing"],
               "properties": {
                 "label": { "type": "string" },
                 "value": { "type": "string" },
-                "sensitive": { "type": "boolean" }
+                "sensitive": { "type": "boolean" },
+                "missing": { "type": "boolean" }
               }
             }
           }
@@ -40,9 +47,15 @@
       }
     },
     "suggested_questions": { "type": "array", "items": { "$ref": "#/$defs/question" }, "maxItems": 8 },
+    "non_diagnostic_notice": { "type": "string" },
+    "fallback_message": { "type": "string" },
     "safety_warnings": { "type": "array", "items": { "type": "object" } },
     "missing_fields": { "type": "object", "additionalProperties": { "type": "string" } },
-    "share_text": { "type": "string" }
+    "share_text": { "type": "string" },
+    "provider": { "type": "string", "enum": ["mock", "openai", "local"] },
+    "provider_mode": { "type": "string", "enum": ["mock", "real", "local"] },
+    "persisted": { "const": false },
+    "review_required": { "const": true }
   },
   "$defs": {
     "question": {
@@ -50,7 +63,7 @@
       "additionalProperties": false,
       "required": ["category", "text", "why_it_may_help"],
       "properties": {
-        "category": { "type": "string", "enum": ["observacao", "contexto", "rotina", "consulta", "registro", "seguranca"] },
+        "category": { "type": "string", "enum": ["observacao", "contexto", "rotina", "consulta", "registro", "seguranca", "emocional", "limites", "gestacao"] },
         "text": { "type": "string" },
         "why_it_may_help": { "type": "string" }
       }

@@ -25,8 +25,8 @@ type OrganizarRelatoEnvelope = {
     topics?: Array<{ label: string; note?: string }>;
     revision_questions?: string[];
     missing_fields?: Record<string, string>;
-    provider?: "mock" | "openai";
-    provider_mode?: "mock" | "real";
+    provider?: "mock" | "openai" | "local";
+    provider_mode?: "mock" | "real" | "local";
     attempted_provider?: "mock" | "openai" | null;
     fallback_reason?: string | null;
   };

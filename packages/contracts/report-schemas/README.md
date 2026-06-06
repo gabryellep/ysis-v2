@@ -10,6 +10,7 @@ Contratos de relatorios estruturados por finalidade.
 - `personal`: registro pessoal.
 - `gynecologist`: ginecologia.
 - `psychologist`: psicologia.
+- `obstetrics`: obstetricia.
 - `urgent_care`: atendimento de urgencia.
 - `sensitive_situation`: situacao sensivel.
 
@@ -21,6 +22,7 @@ Contratos de relatorios estruturados por finalidade.
 - Avisos de seguranca.
 - Perguntas sugeridas.
 - Campos ausentes preenchidos como `nao informado`.
+- `report_type`, `audience`, `tone`, `non_diagnostic_notice`, `fallback_message` e flags `persisted=false`/`review_required=true`.
 - Versoes de schema, prompt e modelo no envelope backend.
 
 Veja `report.schema.json` e `types.ts`.

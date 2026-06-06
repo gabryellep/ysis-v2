@@ -106,6 +106,7 @@ export function MesaDeRelato({ mode, draft, discreetMode, onDraftChange, onModeC
           relato={draft.text}
           purpose={draft.purpose}
           discreetMode={discreetMode}
+          inputMode={draft.inputMode}
           onBack={() => onModeChange("purpose")}
           onEditRelato={() => onModeChange("review")}
           onStartNew={deleteSession}

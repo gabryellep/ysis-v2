@@ -7,6 +7,7 @@ from app.schemas.common import (
     ConsentEvidence,
     ClientContext,
     NOT_INFORMED,
+    REVIEW_NOTICE,
     ReportPurpose,
     SafetyWarning,
     StrictSchema,
@@ -18,6 +19,7 @@ class ReportSectionItem(StrictSchema):
     label: str = Field(min_length=1, max_length=160)
     value: str = Field(default=NOT_INFORMED, max_length=2000)
     sensitive: bool = False
+    missing: bool = False
 
 
 class ReportSection(StrictSchema):
@@ -27,7 +29,17 @@ class ReportSection(StrictSchema):
 
 
 class SuggestedQuestion(StrictSchema):
-    category: Literal["observacao", "contexto", "rotina", "consulta", "registro", "seguranca"]
+    category: Literal[
+        "observacao",
+        "contexto",
+        "rotina",
+        "consulta",
+        "registro",
+        "seguranca",
+        "emocional",
+        "limites",
+        "gestacao",
+    ]
     text: str = Field(min_length=1, max_length=400)
     why_it_may_help: str = Field(default=NOT_INFORMED, max_length=500)
 
@@ -35,14 +47,33 @@ class SuggestedQuestion(StrictSchema):
 class StructuredReport(StrictSchema):
     title: str = Field(min_length=1, max_length=160)
     purpose: ReportPurpose
+    report_type: Literal[
+        "ginecologia",
+        "psicologia",
+        "obstetricia",
+        "registro_pessoal",
+        "situacao_sensivel",
+        "geral",
+    ] = "geral"
+    audience: str = Field(default=NOT_INFORMED, max_length=160)
+    tone: str = Field(default=NOT_INFORMED, max_length=240)
     period: str = Field(default=NOT_INFORMED, max_length=160)
     source_record_ids: list[str] = Field(default_factory=list, max_length=30)
     summary: str = Field(default=NOT_INFORMED, max_length=2000)
     sections: list[ReportSection] = Field(default_factory=list, max_length=12)
     suggested_questions: list[SuggestedQuestion] = Field(default_factory=list, max_length=8)
+    non_diagnostic_notice: str = Field(default=REVIEW_NOTICE, max_length=600)
+    fallback_message: str = Field(
+        default="Se algum dado estiver ausente ou incerto, mantenha como nao informado e revise manualmente.",
+        max_length=700,
+    )
     safety_warnings: list[SafetyWarning] = Field(default_factory=list)
     missing_fields: dict[str, str] = Field(default_factory=dict)
     share_text: str = Field(default="", max_length=6000)
+    provider: Literal["mock", "openai", "local"] = "mock"
+    provider_mode: Literal["mock", "real", "local"] = "mock"
+    persisted: Literal[False] = False
+    review_required: Literal[True] = True
 
 
 class GerarRelatorioRequest(StrictSchema):
@@ -74,4 +105,3 @@ class PerguntasSugeridasResult(StrictSchema):
     questions: list[SuggestedQuestion] = Field(default_factory=list, max_length=8)
     omitted: list[str] = Field(default_factory=list)
     user_can_edit: Literal[True] = True
-

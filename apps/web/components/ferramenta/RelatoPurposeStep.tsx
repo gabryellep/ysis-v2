@@ -12,10 +12,11 @@ type RelatoPurposeStepProps = {
 };
 
 const purposes: Array<{ id: RelatoPurpose; label: string; description: string; mark: string; tone: string }> = [
-  { id: "consultation", label: "Levar para consulta", description: "Organizar um resumo para atendimento.", mark: "cons", tone: "rose" },
-  { id: "symptoms", label: "Organizar sintomas", description: "Separar pontos, sintomas e contexto.", mark: "sint", tone: "lavender" },
-  { id: "conversation", label: "Preparar conversa", description: "Criar perguntas e frases de apoio.", mark: "fala", tone: "honey" },
-  { id: "personal", label: "Registrar para mim", description: "Guardar um registro pessoal revisavel.", mark: "memo", tone: "vault" }
+  { id: "gynecologist", label: "Ginecologista", description: "Sintomas fisicos, ciclo se informado e duvidas para consulta.", mark: "gin", tone: "rose" },
+  { id: "psychologist", label: "Psicologa", description: "Sentimentos, vergonha, medo, bloqueios e frase de abertura.", mark: "psi", tone: "lavender" },
+  { id: "obstetrics", label: "Obstetricia", description: "Contexto gestacional se informado, sinais e pontos para avaliacao.", mark: "obs", tone: "honey" },
+  { id: "personal", label: "Registro pessoal", description: "Data, relato organizado, evolucao percebida e pontos para acompanhar.", mark: "memo", tone: "vault" },
+  { id: "sensitive_situation", label: "Situacao sensivel", description: "Registro neutro, partes lembradas e incertas, limites e apoio desejado.", mark: "sens", tone: "rose" }
 ];
 
 export function RelatoPurposeStep({ value, discreetMode, onChange, onBack, onContinue }: RelatoPurposeStepProps) {
@@ -64,7 +65,7 @@ export function RelatoPurposeStep({ value, discreetMode, onChange, onBack, onCon
 
       <div className="mt-6 flex justify-center">
         <button type="button" onClick={onContinue} disabled={!value} className="rounded-xl bg-[rgb(var(--color-wine))] px-5 py-2.5 text-sm font-semibold text-paper transition hover:bg-[rgba(103,43,66,0.9)] disabled:cursor-not-allowed disabled:opacity-45">
-          {discreetMode ? "Gerar documento demonstrativo" : "Gerar relatorio demonstrativo"}
+          {discreetMode ? "Gerar documento" : "Gerar relatorio"}
         </button>
       </div>
     </motion.div>

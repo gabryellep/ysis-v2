@@ -37,6 +37,7 @@ class ReportPurpose(StrEnum):
     PERSONAL = "personal"
     GYNECOLOGIST = "gynecologist"
     PSYCHOLOGIST = "psychologist"
+    OBSTETRICS = "obstetrics"
     URGENT_CARE = "urgent_care"
     SENSITIVE_SITUATION = "sensitive_situation"
 

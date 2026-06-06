@@ -49,6 +49,14 @@ FORBIDDEN_LANGUAGE_PATTERNS = [
     "prescrevo",
     "prescricao",
     "conclusao sobre",
+    "foi abuso",
+    "isso foi abuso",
+    "voce sofreu abuso",
+    "voce foi abusada",
+    "foi violencia",
+    "isso foi violencia",
+    "voce sofreu violencia",
+    "foi estupro",
 ]
 
 SAFE_NEGATION_PATTERNS = [
@@ -64,6 +72,10 @@ SAFE_NEGATION_PATTERNS = [
     "nao substitui profissional",
     "nao prescreve remedio",
     "nao prescreve medicamentos",
+    "nao conclui violencia",
+    "nao conclui abuso",
+    "sem concluir violencia",
+    "sem concluir abuso",
 ]
 
 SAFE_LANGUAGE_ALTERNATIVES = {
@@ -84,6 +96,25 @@ SAFE_LANGUAGE_ALTERNATIVES = {
     "diagnostico": "avaliacao profissional",
     "tratamento": "orientacao profissional",
     "prescricao": "orientacao profissional",
+    "foi abuso": "foi relatado como uma situacao sensivel",
+    "isso foi abuso": "isso foi relatado como uma situacao sensivel",
+    "voce sofreu abuso": "voce relatou uma situacao sensivel",
+    "voce foi abusada": "voce relatou uma situacao sensivel",
+    "foi violencia": "foi relatado como uma situacao sensivel",
+    "isso foi violencia": "isso foi relatado como uma situacao sensivel",
+    "voce sofreu violencia": "voce relatou uma situacao sensivel",
+    "foi estupro": "foi relatado como uma situacao sensivel",
+}
+
+SENSITIVE_CONCLUSION_PATTERNS = {
+    "foi abuso",
+    "isso foi abuso",
+    "voce sofreu abuso",
+    "voce foi abusada",
+    "foi violencia",
+    "isso foi violencia",
+    "voce sofreu violencia",
+    "foi estupro",
 }
 
 
@@ -94,6 +125,9 @@ def normalize_for_safety(value: str) -> str:
 
 
 def _is_safely_negated(normalized_text: str, normalized_pattern: str) -> bool:
+    if normalized_pattern in {normalize_for_safety(pattern) for pattern in SENSITIVE_CONCLUSION_PATTERNS}:
+        return False
+
     sentences = re.split(r"[.!?\n]+", normalized_text)
     return any(
         normalized_pattern in sentence

@@ -24,19 +24,32 @@ class ConsentLogResult(StrictSchema):
     consent_type: str
     decision: str
     received_at: datetime
-    persisted: Literal[False] = False
+    persisted: bool = False
     note: str
 
 
 class PrivacyEventInput(StrictSchema):
     event_type: Literal[
+        "consent_granted",
+        "consent_revoked",
+        "guest_session_started",
+        "do_not_save_preference_set",
         "session_deleted",
         "discreet_mode_enabled",
         "discreet_mode_disabled",
-        "export_requested",
-        "delete_requested",
+        "cloud_export_requested",
+        "cloud_delete_requested",
     ]
-    category: Literal["guest_session", "symptom_records", "reports", "all_local_data"]
+    category: Literal[
+        "guest_session",
+        "symptom_records",
+        "reports",
+        "user_profile",
+        "consent_logs",
+        "privacy_events",
+        "all_cloud_data",
+        "all_local_data",
+    ]
     source: str = Field(default="ferramenta", max_length=80)
 
 
@@ -54,5 +67,5 @@ class PrivacyEventResult(StrictSchema):
     event_type: str
     category: str
     received_at: datetime
-    persisted: Literal[False] = False
+    persisted: bool = False
     note: str

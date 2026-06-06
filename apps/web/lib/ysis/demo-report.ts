@@ -43,7 +43,8 @@ export function buildDemoReport(relato: string, purpose: RelatoPurpose): DemoRep
     ],
     importantNotes: [
       "Este material nao substitui atendimento profissional.",
-      "As informacoes podem ser editadas antes de copiar, salvar ou levar para uma consulta.",
+      "Voce controla o que deseja manter, editar, copiar ou apagar.",
+      "As informacoes podem ser editadas antes de copiar ou levar para uma consulta.",
       "Se houver dor intensa, sangramento importante, febre, desmaio ou outro sinal urgente, procure atendimento de saude."
     ]
   };

@@ -5,6 +5,7 @@ import type { RelatoPurpose } from "@/lib/ysis/types";
 
 type RelatoPurposeStepProps = {
   value: RelatoPurpose | null;
+  discreetMode: boolean;
   onChange: (purpose: RelatoPurpose) => void;
   onBack: () => void;
   onContinue: () => void;
@@ -17,7 +18,7 @@ const purposes: Array<{ id: RelatoPurpose; label: string; description: string; m
   { id: "personal", label: "Registrar para mim", description: "Guardar um registro pessoal revisavel.", mark: "memo", tone: "vault" }
 ];
 
-export function RelatoPurposeStep({ value, onChange, onBack, onContinue }: RelatoPurposeStepProps) {
+export function RelatoPurposeStep({ value, discreetMode, onChange, onBack, onContinue }: RelatoPurposeStepProps) {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }} className="flex min-h-full flex-col">
       <button type="button" onClick={onBack} className="mb-8 flex w-fit items-center gap-2 text-sm text-muted transition hover:text-ink">
@@ -27,9 +28,9 @@ export function RelatoPurposeStep({ value, onChange, onBack, onContinue }: Relat
 
       <div className="mb-8 max-w-3xl">
         <p className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[rgb(var(--color-lavender-deep))]">finalidade</p>
-        <h1 className="mt-4 font-display text-4xl italic leading-tight text-ink lg:text-5xl">Como voce quer usar este material?</h1>
+        <h1 className="mt-4 font-display text-4xl italic leading-tight text-ink lg:text-5xl">{discreetMode ? "Como voce quer organizar este registro?" : "Como voce quer usar este material?"}</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-          A finalidade muda a organizacao do relatorio, mantendo o texto revisavel e sem diagnostico.
+          {discreetMode ? "A finalidade muda a organizacao do documento, mantendo o texto revisavel e sem diagnostico." : "A finalidade muda a organizacao do relatorio, mantendo o texto revisavel e sem diagnostico."}
         </p>
       </div>
 
@@ -63,7 +64,7 @@ export function RelatoPurposeStep({ value, onChange, onBack, onContinue }: Relat
 
       <div className="mt-6 flex justify-center">
         <button type="button" onClick={onContinue} disabled={!value} className="rounded-xl bg-[rgb(var(--color-wine))] px-5 py-2.5 text-sm font-semibold text-paper transition hover:bg-[rgba(103,43,66,0.9)] disabled:cursor-not-allowed disabled:opacity-45">
-          Gerar relatorio demonstrativo
+          {discreetMode ? "Gerar documento demonstrativo" : "Gerar relatorio demonstrativo"}
         </button>
       </div>
     </motion.div>

@@ -6,6 +6,7 @@ import type { RelatoDraft } from "@/lib/session/experience-state";
 
 type EditorDeRelatoProps = {
   draft: RelatoDraft;
+  discreetMode: boolean;
   onChange: (draft: Partial<RelatoDraft>) => void;
   onClear: () => void;
   onBack: () => void;
@@ -15,7 +16,7 @@ type EditorDeRelatoProps = {
 
 const suggestions = ["Descreva quando comecou", "Como esta afetando seu dia", "O que ja tentou fazer"];
 
-export function EditorDeRelato({ draft, onChange, onClear, onBack, onReview, onPreferVoice }: EditorDeRelatoProps) {
+export function EditorDeRelato({ draft, discreetMode, onChange, onClear, onBack, onReview, onPreferVoice }: EditorDeRelatoProps) {
   const [showSuggestions, setShowSuggestions] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const charCount = draft.text.length;
@@ -46,12 +47,12 @@ export function EditorDeRelato({ draft, onChange, onClear, onBack, onReview, onP
             ref={textareaRef}
             value={draft.text}
             onChange={(event) => updateText(event.target.value)}
-            aria-label="Relato privado"
+            aria-label={discreetMode ? "Registro pessoal" : "Relato privado"}
             className="h-full min-h-[360px] w-full resize-none bg-transparent text-base leading-8 text-ink outline-none lg:min-h-[470px] lg:text-lg"
           />
           {!draft.text ? (
             <p className="pointer-events-none absolute left-6 top-6 max-w-xl text-base leading-8 text-muted/50 lg:left-9 lg:top-9 lg:text-lg">
-              Conte o que esta sentindo ou vivenciando...
+              {discreetMode ? "Anote os pontos que voce quer organizar..." : "Conte o que esta sentindo ou vivenciando..."}
             </p>
           ) : null}
         </div>
@@ -75,7 +76,7 @@ export function EditorDeRelato({ draft, onChange, onClear, onBack, onReview, onP
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-6">
         <div className="mx-auto flex max-w-fit items-center justify-center gap-2 rounded-2xl border border-[rgba(103,43,66,0.08)] bg-[rgb(var(--color-paper))] p-2 shadow-[0_16px_48px_rgba(103,43,66,0.1)]">
-          <button type="button" onClick={onPreferVoice} className="rounded-xl px-4 py-2.5 text-sm text-muted transition hover:bg-[rgba(188,167,219,0.2)] hover:text-[rgb(var(--color-lavender-deep))]">Falar</button>
+          <button type="button" onClick={onPreferVoice} className="rounded-xl px-4 py-2.5 text-sm text-muted transition hover:bg-[rgba(188,167,219,0.2)] hover:text-[rgb(var(--color-lavender-deep))]">{discreetMode ? "Simular fala" : "Falar"}</button>
           {draft.text.length > 0 ? (
             <>
               <div className="h-6 w-px bg-[rgba(103,43,66,0.12)]" />

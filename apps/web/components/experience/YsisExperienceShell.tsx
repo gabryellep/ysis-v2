@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
+import { DiscreetModeToggle } from "@/components/ferramenta/DiscreetModeToggle";
 import { HomeFerramenta } from "@/components/experience/HomeFerramenta";
 import { MesaDeRelato } from "@/components/experience/MesaDeRelato";
 import { MobileWorkspaceNav } from "@/components/experience/MobileWorkspaceNav";
@@ -12,11 +13,12 @@ export function YsisExperienceShell() {
   const [activeView, setActiveView] = useState<WorkspaceView>("home");
   const [mesaMode, setMesaMode] = useState<MesaMode>("rest");
   const [relatoDraft, setRelatoDraft] = useState<RelatoDraft>(initialRelatoDraft);
+  const [discreetMode, setDiscreetMode] = useState(false);
 
   function openIntake() {
     setRelatoDraft(initialRelatoDraft);
     setActiveView("intake");
-    setMesaMode("rest");
+    setMesaMode("privacy");
   }
 
   function updateRelatoDraft(nextDraft: Partial<RelatoDraft>) {
@@ -30,6 +32,9 @@ export function YsisExperienceShell() {
 
       <main className="min-h-screen lg:ml-64">
         <div className="mx-auto min-h-screen max-w-6xl px-4 pb-24 pt-20 lg:px-10 lg:py-10">
+          <div className="mb-4 flex justify-end">
+            <DiscreetModeToggle enabled={discreetMode} onChange={setDiscreetMode} />
+          </div>
           <AnimatePresence mode="wait">
             <motion.div
               key={`${activeView}-${activeView === "intake" ? mesaMode : "view"}`}
@@ -44,8 +49,10 @@ export function YsisExperienceShell() {
                 <MesaDeRelato
                   mode={mesaMode}
                   draft={relatoDraft}
+                  discreetMode={discreetMode}
                   onDraftChange={updateRelatoDraft}
                   onModeChange={setMesaMode}
+                  onDiscreetModeChange={setDiscreetMode}
                   onStartNew={openIntake}
                   onNavigate={setActiveView}
                 />

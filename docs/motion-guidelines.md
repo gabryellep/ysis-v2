@@ -1,6 +1,6 @@
 # Ysis V2 Motion Guidelines
 
-Status: foundation only. Motion primitives are prepared for the next landing implementation.
+Status: current landing and tool flow use local Framer Motion patterns directly in their components.
 
 ## Motion Purpose
 
@@ -15,15 +15,12 @@ Use motion for storytelling, hierarchy, feedback and state transitions. Do not a
 - Floating product mockups.
 - Horizontal scrolling section.
 - Translucent layers, blur, soft light and depth.
-- Elegant microinteractions with Framer Motion and GSAP.
+- Elegant microinteractions with Framer Motion.
 
 ## Current Foundation
 
-- `AnimatedPhrase` uses Framer Motion for scroll entrance.
-- `FloatingMockup` uses Framer Motion for controlled floating.
-- `HorizontalRail` provides a base for future horizontal sections.
-- `loadScrollTrigger` centralizes GSAP ScrollTrigger registration.
-- `createSmoothScroll` centralizes Lenis setup.
+- Landing and `/ferramenta` components currently implement motion locally with Framer Motion and CSS animation.
+- No shared GSAP, Lenis or Three.js runtime helper is active after the Phase 3 cleanup.
 
 ## Accessibility
 

@@ -1,28 +1,52 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { PrivacyConsentStep } from "@/components/ferramenta/PrivacyConsentStep";
 import { RelatoPurposeStep } from "@/components/ferramenta/RelatoPurposeStep";
 import { RelatoReportStep } from "@/components/ferramenta/RelatoReportStep";
 import { RelatoReviewStep } from "@/components/ferramenta/RelatoReviewStep";
 import { CapsulaDeVoz } from "@/components/intake/CapsulaDeVoz";
 import { EditorDeRelato } from "@/components/intake/EditorDeRelato";
 import type { MesaMode, RelatoDraft, WorkspaceView } from "@/lib/session/experience-state";
+import type { ConsentKey } from "@/lib/ysis/privacy";
 
 type MesaDeRelatoProps = {
   mode: MesaMode;
   draft: RelatoDraft;
+  discreetMode: boolean;
   onDraftChange: (draft: Partial<RelatoDraft>) => void;
   onModeChange: (mode: MesaMode) => void;
+  onDiscreetModeChange: (enabled: boolean) => void;
   onStartNew: () => void;
   onNavigate: (view: WorkspaceView) => void;
 };
 
-export function MesaDeRelato({ mode, draft, onDraftChange, onModeChange, onStartNew, onNavigate }: MesaDeRelatoProps) {
+export function MesaDeRelato({ mode, draft, discreetMode, onDraftChange, onModeChange, onDiscreetModeChange, onStartNew, onNavigate }: MesaDeRelatoProps) {
   const previousInputStep = draft.inputMode === "voice" ? "voice" : "writing";
+  const copy = getDiscreetCopy(discreetMode);
+
+  function updateConsent(key: ConsentKey, value: boolean) {
+    onDraftChange({ consent: { ...draft.consent, [key]: value } });
+  }
+
+  function deleteSession() {
+    onStartNew();
+  }
 
   return (
     <AnimatePresence mode="wait">
-      {mode === "rest" ? <ChooseMode key="choose" onBack={() => onNavigate("home")} onWrite={() => {
+      {mode === "privacy" ? (
+        <PrivacyConsentStep
+          key="privacy"
+          consent={draft.consent}
+          discreetMode={discreetMode}
+          onConsentChange={updateConsent}
+          onDiscreetModeChange={onDiscreetModeChange}
+          onBack={() => onNavigate("home")}
+          onContinue={() => onModeChange("rest")}
+        />
+      ) : null}
+      {mode === "rest" ? <ChooseMode key="choose" copy={copy.choose} onBack={() => onNavigate("home")} onWrite={() => {
         onDraftChange({ inputMode: "writing" });
         onModeChange("writing");
       }} onVoice={() => {
@@ -33,6 +57,7 @@ export function MesaDeRelato({ mode, draft, onDraftChange, onModeChange, onStart
         <EditorDeRelato
           key="write"
           draft={draft}
+          discreetMode={discreetMode}
           onChange={(nextDraft) => onDraftChange({ ...nextDraft, inputMode: "writing" })}
           onClear={() => onDraftChange({ text: "", quickNote: "" })}
           onBack={() => onModeChange("rest")}
@@ -44,6 +69,7 @@ export function MesaDeRelato({ mode, draft, onDraftChange, onModeChange, onStart
         <CapsulaDeVoz
           key="voice"
           draft={draft}
+          discreetMode={discreetMode}
           onChange={onDraftChange}
           onBack={() => onModeChange("rest")}
           onReview={() => onModeChange("review")}
@@ -57,15 +83,18 @@ export function MesaDeRelato({ mode, draft, onDraftChange, onModeChange, onStart
         <RelatoReviewStep
           key="review"
           draft={draft}
+          discreetMode={discreetMode}
           onChange={onDraftChange}
           onBack={() => onModeChange(previousInputStep)}
           onContinue={() => onModeChange("purpose")}
+          onDeleteSession={deleteSession}
         />
       ) : null}
       {mode === "purpose" ? (
         <RelatoPurposeStep
           key="purpose"
           value={draft.purpose}
+          discreetMode={discreetMode}
           onChange={(purpose) => onDraftChange({ purpose })}
           onBack={() => onModeChange("review")}
           onContinue={() => onModeChange("demo-report")}
@@ -76,16 +105,27 @@ export function MesaDeRelato({ mode, draft, onDraftChange, onModeChange, onStart
           key="demo-report"
           relato={draft.text}
           purpose={draft.purpose}
+          discreetMode={discreetMode}
           onBack={() => onModeChange("purpose")}
           onEditRelato={() => onModeChange("review")}
-          onStartNew={onStartNew}
+          onStartNew={deleteSession}
         />
       ) : null}
     </AnimatePresence>
   );
 }
 
-function ChooseMode({ onBack, onWrite, onVoice }: { onBack: () => void; onWrite: () => void; onVoice: () => void }) {
+type ChooseCopy = {
+  kicker: string;
+  title: string;
+  text: string;
+  writeTitle: string;
+  writeText: string;
+  voiceTitle: string;
+  voiceText: string;
+};
+
+function ChooseMode({ copy, onBack, onWrite, onVoice }: { copy: ChooseCopy; onBack: () => void; onWrite: () => void; onVoice: () => void }) {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }} className="flex min-h-full flex-col">
       <button type="button" onClick={onBack} className="mb-8 flex w-fit items-center gap-2 text-sm text-muted transition hover:text-ink">
@@ -96,10 +136,10 @@ function ChooseMode({ onBack, onWrite, onVoice }: { onBack: () => void; onWrite:
       <div className="mb-12 text-center">
         <motion.div initial={{ scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.1 }} className="mb-4 inline-flex items-center gap-2 rounded-full bg-[rgba(188,167,219,0.24)] px-4 py-2 text-sm text-[rgb(var(--color-lavender-deep))]">
           <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--color-lavender-deep))]" />
-          Mesa de relato
+          {copy.kicker}
         </motion.div>
-        <h1 className="mx-auto max-w-3xl font-display text-4xl italic leading-tight text-ink lg:text-5xl">Voce prefere escrever ou falar?</h1>
-        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted lg:text-base">Escolha o que for mais confortavel agora. Voce segue no seu ritmo.</p>
+        <h1 className="mx-auto max-w-3xl font-display text-4xl italic leading-tight text-ink lg:text-5xl">{copy.title}</h1>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted lg:text-base">{copy.text}</p>
       </div>
 
       <div className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 lg:flex-row lg:gap-6">
@@ -114,8 +154,8 @@ function ChooseMode({ onBack, onWrite, onVoice }: { onBack: () => void; onWrite:
           </motion.div>
           <div className="relative z-10">
             <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(231,176,184,0.28)] font-mono text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-wine">txt</div>
-            <h2 className="text-2xl font-semibold text-ink">Escrever</h2>
-            <p className="mt-3 max-w-sm text-sm leading-6 text-muted">Digite no seu ritmo, organize seus pensamentos enquanto escreve.</p>
+            <h2 className="text-2xl font-semibold text-ink">{copy.writeTitle}</h2>
+            <p className="mt-3 max-w-sm text-sm leading-6 text-muted">{copy.writeText}</p>
           </div>
         </motion.button>
 
@@ -128,11 +168,39 @@ function ChooseMode({ onBack, onWrite, onVoice }: { onBack: () => void; onWrite:
           </motion.div>
           <div className="relative z-10">
             <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(188,167,219,0.34)] font-mono text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[rgb(var(--color-lavender-deep))]">voz</div>
-            <h2 className="text-2xl font-semibold text-ink">Falar</h2>
-            <p className="mt-3 max-w-sm text-sm leading-6 text-muted">Grave sua voz e deixe suas palavras fluirem naturalmente.</p>
+            <h2 className="text-2xl font-semibold text-ink">{copy.voiceTitle}</h2>
+            <p className="mt-3 max-w-sm text-sm leading-6 text-muted">{copy.voiceText}</p>
           </div>
         </motion.button>
       </div>
     </motion.div>
   );
+}
+
+function getDiscreetCopy(discreetMode: boolean) {
+  if (discreetMode) {
+    return {
+      choose: {
+        kicker: "Registro pessoal",
+        title: "Voce prefere escrever ou simular fala?",
+        text: "Escolha o formato mais confortavel para organizar seu bem-estar agora.",
+        writeTitle: "Escrever",
+        writeText: "Digite no seu ritmo e organize os pontos que deseja lembrar.",
+        voiceTitle: "Simular fala",
+        voiceText: "Demonstracao visual. Nenhum audio e gravado nesta versao."
+      }
+    };
+  }
+
+  return {
+    choose: {
+      kicker: "Mesa de relato",
+      title: "Voce prefere escrever ou falar?",
+      text: "Escolha o que for mais confortavel agora. Voce segue no seu ritmo.",
+      writeTitle: "Escrever",
+      writeText: "Digite no seu ritmo, organize seus pensamentos enquanto escreve.",
+      voiceTitle: "Falar",
+      voiceText: "Use uma simulacao de fala e depois escreva o trecho que deseja revisar."
+    }
+  };
 }

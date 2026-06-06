@@ -8,13 +8,14 @@ type VoiceState = "ready" | "recording" | "paused" | "finished";
 
 type CapsulaDeVozProps = {
   draft: RelatoDraft;
+  discreetMode: boolean;
   onChange: (draft: Partial<RelatoDraft>) => void;
   onBack: () => void;
   onReview: () => void;
   onSwitchToWrite: () => void;
 };
 
-export function CapsulaDeVoz({ draft, onChange, onBack, onReview, onSwitchToWrite }: CapsulaDeVozProps) {
+export function CapsulaDeVoz({ draft, discreetMode, onChange, onBack, onReview, onSwitchToWrite }: CapsulaDeVozProps) {
   const [state, setState] = useState<VoiceState>("ready");
   const [duration, setDuration] = useState(0);
 
@@ -59,7 +60,7 @@ export function CapsulaDeVoz({ draft, onChange, onBack, onReview, onSwitchToWrit
                 {state === "ready" ? (
                   <motion.button key="start" type="button" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={() => setState("recording")} className="relative flex h-24 w-24 items-center justify-center rounded-full bg-[rgb(var(--color-lavender-deep))] text-paper transition hover:bg-[rgba(129,94,158,0.9)]">
                     <span className="absolute inset-0 animate-ping rounded-full bg-[rgba(129,94,158,0.24)]" />
-                    <span className="relative font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em]">rec</span>
+                    <span className="relative font-mono text-[0.65rem] font-semibold uppercase tracking-[0.16em]">demo</span>
                   </motion.button>
                 ) : null}
 
@@ -79,12 +80,12 @@ export function CapsulaDeVoz({ draft, onChange, onBack, onReview, onSwitchToWrit
 
                 {state === "finished" ? (
                   <motion.div key="finished" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="flex flex-col items-center gap-4">
-                    <p className="text-sm text-muted">Gravacao finalizada</p>
+                    <p className="text-sm text-muted">Demonstracao concluida</p>
                     <textarea
                       value={draft.text}
                       onChange={(event) => onChange({ text: event.target.value, inputMode: "voice" })}
-                      aria-label="Relato de voz para revisao"
-                      placeholder="Nesta demonstracao, escreva aqui o que voce quer revisar depois de falar."
+                      aria-label={discreetMode ? "Texto da demonstracao para revisao" : "Relato de voz para revisao"}
+                      placeholder={discreetMode ? "Nesta demonstracao, escreva aqui os pontos que voce quer revisar." : "Nesta demonstracao, escreva aqui o que voce quer revisar depois de falar."}
                       className="min-h-32 w-full max-w-xl resize-none rounded-2xl border border-[rgba(103,43,66,0.08)] bg-[rgb(var(--color-paper))] p-4 text-sm leading-6 text-ink outline-none placeholder:text-muted/50"
                     />
                     <div className="flex items-center gap-3">
@@ -96,12 +97,13 @@ export function CapsulaDeVoz({ draft, onChange, onBack, onReview, onSwitchToWrit
               </AnimatePresence>
 
               <p className="mt-6 text-center text-sm text-muted">{statusText(state)}</p>
+              <p className="mt-2 text-center text-xs text-muted">Demonstracao visual. Nenhum audio esta sendo gravado nesta versao.</p>
             </div>
           </div>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-6 flex items-center justify-center gap-2 text-xs text-muted">
             <span className="h-1.5 w-1.5 rounded-full bg-[rgb(var(--color-lavender-deep))]" />
-            Audio nao salvo por padrao
+            Modo demonstrativo: nenhum audio e gravado ou armazenado nesta fase
           </motion.div>
         </motion.div>
       </div>
@@ -151,8 +153,8 @@ function formatTime(seconds: number) {
 }
 
 function statusText(state: VoiceState) {
-  if (state === "recording") return "Gravando... fale no seu ritmo";
-  if (state === "paused") return "Gravacao pausada";
-  if (state === "finished") return "Pronta para revisar antes de usar";
-  return "Toque para comecar a gravar";
+  if (state === "recording") return "Simulacao visual em andamento, sem capturar audio";
+  if (state === "paused") return "Simulacao pausada";
+  if (state === "finished") return "Pronta para escrever e revisar antes de usar";
+  return "Toque para iniciar a demonstracao";
 }

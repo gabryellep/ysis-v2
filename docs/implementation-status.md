@@ -2,7 +2,7 @@
 
 ## Current Step
 
-Fase 3 aprovada: fluxo demonstrativo da ferramenta em `/ferramenta`.
+Fase 5 iniciada: fundacao real de backend, contratos, safety, Supabase/RLS e endpoints seguros.
 
 ## Done
 
@@ -16,11 +16,16 @@ Fase 3 aprovada: fluxo demonstrativo da ferramenta em `/ferramenta`.
 - Implemented `/ferramenta` with the approved Phase 3 demonstrative flow: start relato, choose writing or speaking mode, insert relato, review, choose purpose and generate a reviewable demonstrative report.
 - Added local demonstrative report generation for: levar para consulta, organizar sintomas, preparar conversa and registrar para mim.
 - Kept voice mode demonstrative only. It does not capture audio and does not perform real transcription.
+- Added FastAPI Pydantic schemas for relatos, relatorios, privacy and common envelopes.
+- Added backend safety/guardrails ported from V1 concepts.
+- Added backend mock provider and report generator as future source of truth for `/ferramenta`.
+- Added structured contracts in `packages/contracts/ai-schemas` and `packages/contracts/report-schemas`.
+- Added initial Supabase migration for V2 with RLS from day one.
 
 ## Not Done Yet
 
 - Login is not implemented.
-- Real backend is not implemented.
+- Real backend persistence is not implemented.
 - Real AI backend is not implemented.
 - Real voice transcription is not implemented.
 - Database persistence is not implemented.

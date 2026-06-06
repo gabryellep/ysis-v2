@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ysis.local/contracts/report.schema.json",
+  "title": "Ysis V2 Structured Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "purpose", "period", "summary", "sections", "suggested_questions", "safety_warnings", "missing_fields"],
+  "properties": {
+    "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "purpose": {
+      "type": "string",
+      "enum": ["consultation", "symptoms", "conversation", "personal", "gynecologist", "psychologist", "urgent_care", "sensitive_situation"]
+    },
+    "period": { "type": "string" },
+    "source_record_ids": { "type": "array", "items": { "type": "string" }, "maxItems": 30 },
+    "summary": { "type": "string" },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "items"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["label", "value", "sensitive"],
+              "properties": {
+                "label": { "type": "string" },
+                "value": { "type": "string" },
+                "sensitive": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "suggested_questions": { "type": "array", "items": { "$ref": "#/$defs/question" }, "maxItems": 8 },
+    "safety_warnings": { "type": "array", "items": { "type": "object" } },
+    "missing_fields": { "type": "object", "additionalProperties": { "type": "string" } },
+    "share_text": { "type": "string" }
+  },
+  "$defs": {
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "text", "why_it_may_help"],
+      "properties": {
+        "category": { "type": "string", "enum": ["observacao", "contexto", "rotina", "consulta", "registro", "seguranca"] },
+        "text": { "type": "string" },
+        "why_it_may_help": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ysis.local/contracts/ai-endpoints.schema.json",
+  "title": "Ysis V2 AI Backend Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["endpoint", "request", "response"],
+  "properties": {
+    "endpoint": {
+      "type": "string",
+      "enum": ["organizar-relato", "gerar-relatorio", "preparar-conversa", "safe-fallback"]
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["action_id", "consent", "client_context"],
+      "properties": {
+        "action_id": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "consent": { "$ref": "#/$defs/consent" },
+        "client_context": { "$ref": "#/$defs/client_context" }
+      }
+    },
+    "response": { "$ref": "#/$defs/envelope" }
+  },
+  "$defs": {
+    "consent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["granted", "text_version", "granted_at", "scopes"],
+      "properties": {
+        "granted": { "const": true },
+        "text_version": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "granted_at": { "type": "string", "format": "date-time" },
+        "scopes": { "type": "array", "items": { "type": "string" }, "maxItems": 12 }
+      }
+    },
+    "client_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "discreet_mode", "source_screen"],
+      "properties": {
+        "mode": { "type": "string", "enum": ["guest", "account"] },
+        "discreet_mode": { "type": "boolean" },
+        "source_screen": { "type": "string" },
+        "session_id": { "type": ["string", "null"] }
+      }
+    },
+    "envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "metadata", "neutral_notice", "limitations", "safety", "result"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schema_version", "prompt_version", "model_version", "generated_at", "review_required"],
+          "properties": {
+            "schema_version": { "type": "string" },
+            "prompt_version": { "type": "string" },
+            "model_version": { "type": "string" },
+            "generated_at": { "type": "string", "format": "date-time" },
+            "review_required": { "const": true }
+          }
+        },
+        "neutral_notice": { "type": "string" },
+        "limitations": { "type": "array", "items": { "type": "string" } },
+        "safety": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["blocked_terms_found", "fallback_used", "warnings"],
+          "properties": {
+            "blocked_terms_found": { "type": "array", "items": { "type": "string" } },
+            "fallback_used": { "type": "boolean" },
+            "warnings": { "type": "array", "items": { "type": "object" } }
+          }
+        },
+        "result": { "type": "object" }
+      }
+    }
+  }
+}

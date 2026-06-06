@@ -50,9 +50,12 @@ def test_gerar_relatorio_has_distinct_structures_for_phase8_purposes() -> None:
     purposes = ["gynecologist", "psychologist", "obstetrics", "personal", "sensitive_situation"]
     try:
         with TestClient(app) as client:
-            reports = [client.post("/relatorios/gerar", json=_payload(purpose)).json()["result"]["report"] for purpose in purposes]
+            responses = [client.post("/relatorios/gerar", json=_payload(purpose)) for purpose in purposes]
     finally:
         app.dependency_overrides.clear()
+
+    assert [response.status_code for response in responses] == [200, 200, 200, 200, 200]
+    reports = [response.json()["result"]["report"] for response in responses]
 
     section_sets = {tuple(section["id"] for section in report["sections"]) for report in reports}
     report_types = {report["report_type"] for report in reports}
